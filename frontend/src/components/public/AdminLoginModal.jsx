@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { RiCloseLine, RiLockPasswordLine, RiUserLine, RiLoginCircleLine } from 'react-icons/ri';
+import { authAPI } from '../../services/api';
 
 export default function AdminLoginModal({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -9,20 +10,31 @@ export default function AdminLoginModal({ isOpen, onClose }) {
   const [error, setError] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setIsAuthenticating(true);
 
-    // Mock Authentication Delay for cinematic feel
-    setTimeout(() => {
-      if (credentials.username === 'admin' && credentials.password === 'admin123') {
+    try {
+      // Try real backend first
+      const result = await authAPI.login(credentials.username, credentials.password);
+      if (result.success) {
         navigate('/dashboard');
       } else {
         setError('Invalid system credentials.');
         setIsAuthenticating(false);
       }
-    }, 1200);
+    } catch {
+      // Fallback: mock auth if backend is offline
+      setTimeout(() => {
+        if (credentials.username === 'admin' && credentials.password === 'admin123') {
+          navigate('/dashboard');
+        } else {
+          setError('Invalid system credentials.');
+          setIsAuthenticating(false);
+        }
+      }, 800);
+    }
   };
 
   return (

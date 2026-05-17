@@ -4,13 +4,12 @@ import { RiCheckDoubleFill, RiErrorWarningLine, RiFlashlightLine, RiRobot2Line, 
 import { GridContext } from '../../context/GridContext';
 
 export default function PublicStatus() {
-  const { complaints, transformers, riskLevel } = useContext(GridContext);
+  const { complaints, transformers, riskLevel, stats: backendStats } = useContext(GridContext);
 
-  const activeOutages = complaints.filter(c => c.severity === 'critical').length;
-  // Mock some resolved data based on active to make it look alive
-  const baseResolved = 124;
-  const resolvedCount = baseResolved + Math.floor(complaints.length / 2);
-  const efficiency = Math.min(99, Math.round((resolvedCount / (resolvedCount + complaints.length)) * 100));
+  const activeOutages = backendStats ? backendStats.active_outages : complaints.filter(c => c.severity === 'critical').length;
+  const resolvedCount = backendStats ? backendStats.resolved_complaints : (124 + Math.floor(complaints.length / 2));
+  const efficiency = backendStats ? backendStats.resolution_rate : Math.min(99, Math.round((resolvedCount / (resolvedCount + complaints.length || 1)) * 100));
+  const totalAnomalies = backendStats ? backendStats.pending_complaints : complaints.length;
 
   const stats = [
     {
@@ -23,7 +22,7 @@ export default function PublicStatus() {
     },
     {
       title: 'Active Grid Anomalies',
-      value: complaints.length.toString(),
+      value: totalAnomalies.toString(),
       icon: RiErrorWarningLine,
       color: 'from-brand-yellow/20 to-orange-500/5',
       iconColor: 'text-brand-yellow',

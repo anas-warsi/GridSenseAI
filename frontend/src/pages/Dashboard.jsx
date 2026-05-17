@@ -5,6 +5,8 @@ import DashboardMap from '../components/DashboardMap';
 import AIInsightsPanel from '../components/AIInsightsPanel';
 import LiveAlertsFeed from '../components/LiveAlertsFeed';
 import GridRiskMeter from '../components/GridRiskMeter';
+import { GridContext } from '../context/GridContext';
+import { RiRobot2Line } from 'react-icons/ri';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -13,6 +15,7 @@ const pageVariants = {
 };
 
 export default function Dashboard() {
+  const { aiSummary } = useContext(GridContext);
 
   return (
     <motion.div
@@ -23,6 +26,20 @@ export default function Dashboard() {
       transition={{ duration: 0.4 }}
       className="min-h-full flex flex-col gap-6 p-6"
     >
+      {/* AI Operational Summary Header */}
+      <div className="glassmorphism p-4 rounded-xl border border-brand-cyan/20 flex items-center gap-4 relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-cyan/10 to-transparent opacity-50" />
+        <div className="p-2 rounded-lg bg-brand-cyan/20 text-brand-cyan relative z-10">
+          <RiRobot2Line className="text-xl animate-pulse" />
+        </div>
+        <div className="relative z-10 flex-1">
+          <div className="text-[10px] uppercase tracking-widest text-brand-cyan font-bold mb-1">Autonomous Grid Intelligence Report</div>
+          <div className="text-gray-200 text-sm italic">
+            "{aiSummary}"
+          </div>
+        </div>
+      </div>
+
       <StatsCards />
       
       <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-[700px]">

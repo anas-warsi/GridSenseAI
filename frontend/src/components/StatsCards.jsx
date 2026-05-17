@@ -4,16 +4,17 @@ import { RiAlertFill, RiFlashlightFill, RiErrorWarningFill, RiDashboard3Fill, Ri
 import { GridContext } from '../context/GridContext';
 
 export default function StatsCards() {
-  const { complaints, transformers, riskLevel } = useContext(GridContext);
+  const { complaints, transformers, riskLevel, stats: backendStats } = useContext(GridContext);
 
-  const activeOutages = complaints.filter(c => c.severity === 'critical').length;
-  const highRiskZones = transformers.filter(t => t.load > 90).length;
-  const avgLoad = Math.round(transformers.reduce((acc, t) => acc + t.load, 0) / transformers.length);
+  const activeOutages = backendStats ? backendStats.active_outages : complaints.filter(c => c.severity === 'critical').length;
+  const highRiskZones = backendStats ? backendStats.critical_transformers : transformers.filter(t => t.load > 90).length;
+  const avgLoad = backendStats ? backendStats.avg_transformer_load : (transformers.length > 0 ? Math.round(transformers.reduce((acc, t) => acc + t.load, 0) / transformers.length) : 0);
+  const totalComplaints = backendStats ? backendStats.total_complaints : complaints.length;
 
   const stats = [
     {
       title: 'Total Complaints',
-      value: complaints.length.toString(),
+      value: totalComplaints.toString(),
       trend: '+1',
       trendUp: true,
       icon: RiAlertFill,

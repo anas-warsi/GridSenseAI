@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { RiSendPlaneFill, RiMapPinLine, RiErrorWarningLine } from 'react-icons/ri';
 import { GridContext } from '../../context/GridContext';
+import { complaintsAPI } from '../../services/api';
 
 export default function ReportIssue() {
   const { addComplaint } = useContext(GridContext);
@@ -14,15 +15,31 @@ export default function ReportIssue() {
   });
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addComplaint({
-      type: formData.type,
-      severity: formData.severity,
-      message: formData.message || 'Citizen reported anomaly.',
-      lat: formData.lat ? parseFloat(formData.lat) : undefined,
-      lng: formData.lng ? parseFloat(formData.lng) : undefined
-    });
+    const lat = parseFloat(formData.lat);
+    const lng = parseFloat(formData.lng);
+
+    try {
+      // POST to backend — Gemini AI analysis runs automatically
+      await complaintsAPI.create({
+        type: formData.type,
+        severity: formData.severity,
+        latitude: lat || 27.8847,
+        longitude: lng || 79.9074,
+        details: formData.message || 'Citizen reported anomaly.',
+      });
+    } catch {
+      // Fallback: update local context if backend is offline
+      addComplaint({
+        type: formData.type,
+        severity: formData.severity,
+        message: formData.message || 'Citizen reported anomaly.',
+        lat: lat || undefined,
+        lng: lng || undefined,
+      });
+    }
+
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
